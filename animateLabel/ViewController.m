@@ -1,27 +1,60 @@
-//
-//  ViewController.m
-//  animateLabel
-//
-//  Created by Rob Mayoff on 10/3/14.
-//  Copyright (c) 2014 Rob Mayoff. All rights reserved.
-//
+    //
+    //  ViewController.m
+    //  animateLabel
+    //
+    //  Created by Rob Mayoff on 10/3/14.
+    //  Copyright (c) 2014 Rob Mayoff. All rights reserved.
+    //
 
-#import "ViewController.h"
+    #import "ViewController.h"
 
-@interface ViewController ()
+    @interface ViewController ()
+    @property (strong, nonatomic) IBOutlet UILabel *label;
+    @property (strong, nonatomic) IBOutlet NSLayoutConstraint *labelContainerWidthConstraint;
+    @property (strong, nonatomic) IBOutlet NSLayoutConstraint *labelContainerHeightConstraint;
+    @property (strong, nonatomic) IBOutlet NSLayoutConstraint *labelWidthConstraint;
+    @property (strong, nonatomic) IBOutlet NSLayoutConstraint *labelHeightConstraint;
+    @end
 
-@end
+    @implementation ViewController
 
-@implementation ViewController
+    - (void)viewDidLoad {
+        [super viewDidLoad];
+        [UIView performWithoutAnimation:^{
+            [self smallButtonWasTapped:self];
+        }];
+    }
 
-- (void)viewDidLoad {
-    [super viewDidLoad];
-    // Do any additional setup after loading the view, typically from a nib.
-}
+    - (IBAction)smallButtonWasTapped:(id)sender {
+        self.labelContainerWidthConstraint.constant = 150;
+        self.label.numberOfLines = 1;
+        self.labelContainerHeightConstraint.constant = [self.label sizeThatFits:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)].height;
+        self.label.numberOfLines = 0;
+        [UIView animateWithDuration:2 animations:^{
+            [self.label.superview layoutIfNeeded];
+        } completion:^(BOOL finished) {
+            if (finished) {
+                self.label.lineBreakMode = NSLineBreakByTruncatingTail;
+                self.labelWidthConstraint.constant = self.labelContainerWidthConstraint.constant;
+                self.labelHeightConstraint.constant = self.labelContainerHeightConstraint.constant;
+            }
+        }];
+    }
 
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
+    - (IBAction)bigButtonWasTapped:(id)sender {
+        // First, get rid of the ellipsis and resize the label without animation.
+        self.label.lineBreakMode = NSLineBreakByWordWrapping;
+        self.label.numberOfLines = 0;
+        self.labelWidthConstraint.constant = 300;
+        self.labelHeightConstraint.constant = [self.label sizeThatFits:CGSizeMake(self.labelWidthConstraint.constant, CGFLOAT_MAX)].height;
+        [self.label layoutIfNeeded];
 
-@end
+        // Now animate the container.
+        self.labelContainerWidthConstraint.constant = self.labelWidthConstraint.constant;
+        self.labelContainerHeightConstraint.constant = self.labelHeightConstraint.constant;
+        [UIView animateWithDuration:2 animations:^{
+            [self.label.superview layoutIfNeeded];
+        }];
+    }
+
+    @end
